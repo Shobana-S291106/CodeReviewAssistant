@@ -15,7 +15,7 @@ function App() {
   const [explanation, setExplanation] = useState("");
   const [explaining, setExplaining] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState(null);
-
+  
   // =====================================================
   // SUGGEST FIX STATES
   // =====================================================
@@ -101,7 +101,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/api/files/upload",
+        "https://code-review-assistant-backend-m2wv.onrender.com/api/files/upload",
         {
           method: "POST",
           body: formData,
@@ -248,7 +248,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/api/review/explain",
+        "https://code-review-assistant-backend-m2wv.onrender.com/api/review/explain",
         {
           method: "POST",
           headers: {
@@ -339,7 +339,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/api/review/suggest-fix",
+        "https://code-review-assistant-backend-m2wv.onrender.com/api/review/suggest-fix",
         {
           method: "POST",
           headers: {
