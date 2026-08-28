@@ -1,6 +1,9 @@
 import { useState } from "react";
 import "./App.css";
 
+const API_URL =
+  "https://code-review-assistant-backend-m2wv.onrender.com";
+
 function App() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -15,7 +18,7 @@ function App() {
   const [explanation, setExplanation] = useState("");
   const [explaining, setExplaining] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState(null);
-  
+
   // =====================================================
   // SUGGEST FIX STATES
   // =====================================================
@@ -93,15 +96,18 @@ function App() {
 
     const formData = new FormData();
 
-    // Must match:
-    // @RequestParam("file")
+    // Must match backend @RequestParam("file")
     formData.append("file", file);
 
     console.log("Uploading:", file.name);
+    console.log(
+      "Backend:",
+      `${API_URL}/api/files/upload`
+    );
 
     try {
       const response = await fetch(
-        "https://code-review-assistant-backend-m2wv.onrender.com/api/files/upload",
+        `${API_URL}/api/files/upload`,
         {
           method: "POST",
           body: formData,
@@ -129,7 +135,7 @@ function App() {
         throw new Error(
           data?.message ||
             data?.error ||
-            "Code analysis failed."
+            `Code analysis failed (${response.status}).`
         );
       }
 
@@ -139,7 +145,7 @@ function App() {
 
       if (err instanceof TypeError) {
         setError(
-          "Unable to connect to the backend. Make sure Spring Boot is running on port 8080."
+          "Unable to connect to the backend. Please check the deployed backend and CORS configuration."
         );
       } else {
         setError(
@@ -248,7 +254,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "https://code-review-assistant-backend-m2wv.onrender.com/api/review/explain",
+        `${API_URL}/api/review/explain`,
         {
           method: "POST",
           headers: {
@@ -258,7 +264,6 @@ function App() {
             issue:
               issue?.message ||
               "Code issue detected.",
-
             code: code || "",
           }),
         }
@@ -339,7 +344,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "https://code-review-assistant-backend-m2wv.onrender.com/api/review/suggest-fix",
+        `${API_URL}/api/review/suggest-fix`,
         {
           method: "POST",
           headers: {
@@ -349,7 +354,6 @@ function App() {
             issue:
               issue?.message ||
               "Code issue detected.",
-
             code: code || "",
           }),
         }
@@ -467,9 +471,7 @@ function App() {
   return (
     <div className="app">
 
-      {/* =================================================
-          HEADER
-      ================================================= */}
+      {/* HEADER */}
 
       <header className="header">
 
@@ -492,15 +494,11 @@ function App() {
 
       </header>
 
-      {/* =================================================
-          MAIN
-      ================================================= */}
+      {/* MAIN */}
 
       <main className="container">
 
-        {/* =================================================
-            UPLOAD CARD
-        ================================================= */}
+        {/* UPLOAD CARD */}
 
         <section className="upload-card">
 
@@ -556,17 +554,13 @@ function App() {
 
         </section>
 
-        {/* =================================================
-            RESULTS
-        ================================================= */}
+        {/* RESULTS */}
 
         {result && (
 
           <section className="results">
 
-            {/* =================================================
-                RESULT HEADER
-            ================================================= */}
+            {/* RESULT HEADER */}
 
             <div className="result-header">
 
@@ -589,9 +583,7 @@ function App() {
 
             </div>
 
-            {/* =================================================
-                SCORE
-            ================================================= */}
+            {/* SCORE */}
 
             <div className="score-card">
 
@@ -617,9 +609,7 @@ function App() {
 
             </div>
 
-            {/* =================================================
-                ISSUE SUMMARY
-            ================================================= */}
+            {/* ISSUE SUMMARY */}
 
             <div className="issue-summary">
 
@@ -661,9 +651,7 @@ function App() {
 
             </div>
 
-            {/* =================================================
-                DETECTED ISSUES
-            ================================================= */}
+            {/* DETECTED ISSUES */}
 
             {issues.length > 0 && (
 
@@ -703,8 +691,6 @@ function App() {
                         }
                       >
 
-                        {/* ISSUE TOP */}
-
                         <div className="issue-top">
 
                           <span
@@ -730,14 +716,10 @@ function App() {
 
                         </div>
 
-                        {/* ISSUE MESSAGE */}
-
                         <h4>
                           {issue?.message ||
                             "No description available."}
                         </h4>
-
-                        {/* SUGGESTION */}
 
                         {issue?.suggestion && (
 
@@ -748,13 +730,7 @@ function App() {
 
                         )}
 
-                        {/* =================================================
-                            ISSUE ACTIONS
-                        ================================================= */}
-
                         <div className="issue-actions">
-
-                          {/* EXPLAIN */}
 
                           <button
                             className="explain-button"
@@ -773,8 +749,6 @@ function App() {
                               ? "Explaining..."
                               : "Explain Issue"}
                           </button>
-
-                          {/* SUGGEST FIX */}
 
                           <button
                             className="fix-button"
@@ -806,9 +780,7 @@ function App() {
 
             )}
 
-            {/* =================================================
-                EXPLANATION PANEL
-            ================================================= */}
+            {/* EXPLANATION PANEL */}
 
             {selectedIssue && (
 
@@ -864,9 +836,7 @@ function App() {
 
             )}
 
-            {/* =================================================
-                SUGGESTED FIX PANEL
-            ================================================= */}
+            {/* FIX PANEL */}
 
             {fixIssue && (
 
@@ -920,9 +890,7 @@ function App() {
 
             )}
 
-            {/* =================================================
-                NO ISSUES
-            ================================================= */}
+            {/* NO ISSUES */}
 
             {issues.length === 0 && (
 
@@ -941,9 +909,7 @@ function App() {
 
             )}
 
-            {/* =================================================
-                SOURCE CODE
-            ================================================= */}
+            {/* SOURCE CODE */}
 
             {sourceCode && (
 
@@ -969,8 +935,6 @@ function App() {
                   </span>
 
                 </div>
-
-                {/* CODE VIEWER */}
 
                 <div className="code-viewer">
 
@@ -1038,9 +1002,7 @@ function App() {
 
             )}
 
-            {/* =================================================
-                FULL REPORT
-            ================================================= */}
+            {/* FULL REPORT */}
 
             <div className="card">
 
