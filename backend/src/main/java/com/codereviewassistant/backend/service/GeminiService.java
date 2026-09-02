@@ -1,11 +1,12 @@
 package com.codereviewassistant.backend.service;
 
-import com.google.genai.Client;
-import com.google.genai.types.GenerateContentResponse;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import com.google.genai.Client;
+import com.google.genai.types.GenerateContentResponse;
 
 @Service
 public class GeminiService {
@@ -315,9 +316,13 @@ public class GeminiService {
      */
 
     private String callGemini(
-            String prompt,
-            String fallbackHeader
-    ) {
+        String prompt,
+        String fallbackHeader
+) {
+
+    int maxAttempts = 3;
+
+    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
 
         try {
 
@@ -329,7 +334,6 @@ public class GeminiService {
                     );
 
             if (response == null) {
-
                 return fallbackHeader
                         + "\n\n"
                         + "Gemini returned no response.";
@@ -338,7 +342,6 @@ public class GeminiService {
             String result = response.text();
 
             if (result == null || result.isBlank()) {
-
                 return fallbackHeader
                         + "\n\n"
                         + "Gemini returned an empty response.";
@@ -354,6 +357,38 @@ public class GeminiService {
                 reason = e.getClass().getSimpleName();
             }
 
+            // Retry temporary Gemini 503 errors
+            if (reason.contains("503")
+                    || reason.toLowerCase().contains("service unavailable")
+                    || reason.toLowerCase().contains("high demand")) {
+
+                if (attempt < maxAttempts) {
+
+                    try {
+                        long delay = attempt * 3000L;
+
+                        System.out.println(
+                                "Gemini temporarily unavailable. " +
+                                "Retrying in " + (delay / 1000) +
+                                " seconds... Attempt " +
+                                (attempt + 1) + "/" + maxAttempts
+                        );
+
+                        Thread.sleep(delay);
+
+                    } catch (InterruptedException interruptedException) {
+
+                        Thread.currentThread().interrupt();
+
+                        return fallbackHeader
+                                + "\n\n"
+                                + "Gemini request was interrupted.";
+                    }
+
+                    continue;
+                }
+            }
+
             return fallbackHeader
                     + "\n\n"
                     + "Gemini Smart Review unavailable.\n"
@@ -364,4 +399,11 @@ public class GeminiService {
                     + reason;
         }
     }
+
+    return fallbackHeader
+            + "\n\n"
+            + "Gemini Smart Review unavailable.\n"
+            + "Model: "
+            + model;
 }
+    }
