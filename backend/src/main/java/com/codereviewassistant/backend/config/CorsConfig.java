@@ -1,4 +1,4 @@
-package com.codereviewassistant.backend;
+package com.codereviewassistant.backend.config;
 
 import java.util.List;
 
@@ -13,10 +13,13 @@ public class CorsConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of(
-                "https://codereviewassistant-0qq7.onrender.com"
+                "https://codereviewassistant-0qq7.onrender.com",
+                "http://localhost:5173",
+                "http://localhost:3000"
         ));
 
         configuration.setAllowedMethods(List.of(
